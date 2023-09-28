@@ -1,47 +1,52 @@
 # KETACLOCK clone
 
-����� MIRO/MobileHackerz ����̃v���W�F�N�g[KETACLOCK - �����ƂɓƗ��������v](http://mobilehackerz.jp/contents/Hardware/KETACLOCK)��͕킵�����̂ł��B���ۂ̉�H��R�[�h�͌��J����Ă��Ȃ����߃I���W�i���Ƃ͈قȂ�܂��B
+これは MIRO/MobileHackerz さんのプロジェクト[KETACLOCK - 桁ごとに独立した時計](http://mobilehackerz.jp/contents/Hardware/KETACLOCK)を模倣したものです。実際の回路やコードは公開されていないためオリジナルとは異なります。
+MSP430
+* 時刻情報を送信する一台のマスタと各桁の表示をおこなうスレーブユニットからなる。
+* できるだけ電池で動作させる。
+* マスタユニットには ESP8266 を用いて NTP 同期による正確な時刻を供給する。
+* 学習のためスレーブユニットは異なるアーキテクチャのマイコンを使ってみる。
+* マスタ - スレーブの通信には赤外線通信(NECフォーマット)を採用する。
 
-* �������𑗐M������̃}�X�^�Ɗe���̕\���������Ȃ��X���[�u���j�b�g����Ȃ�B
-* �ł��邾���d�r�œ��삳����B
-* �}�X�^���j�b�g�ɂ� ESP8266 ��p���� NTP �����ɂ�鐳�m�Ȏ�������������B
-* �w�K�̂��߃X���[�u���j�b�g�͈قȂ�A�[�L�e�N�`���̃}�C�R�����g���Ă݂�B
-* �}�X�^ - �X���[�u�̒ʐM�ɂ͐ԊO���ʐM(NEC�t�H�[�}�b�g)���̗p����B
+## 赤外線通信
 
-## �ԊO���ʐM
+マスタからスレーブには赤外線通信により時刻(時分秒)情報を送信します。
+UART データを直接扱うことも考えましたが、既存のライブラリを使って簡単に動かそうと赤外線リモコンに用いられる NEC フォーマットを採用しました。乱暴に時分秒データを次のように割り振っています。このために一般のリモコンと干渉します。リーダー長を変更するなど独自フォーマットとすべきでしょうが実験目的として目をつぶっています。UART データ直接でも良いかと思います。
 
-�}�X�^����X���[�u�ɂ͐ԊO���ʐM�ɂ�莞��(�����b)���𑗐M���܂��B
-UART �f�[�^�𒼐ڈ������Ƃ��l���܂������A�����̃��C�u�������g���ĊȒP�ɓ��������ƐԊO�������R���ɗp������ NEC �t�H�[�}�b�g���̗p���܂����B���\�Ɏ����b�f�[�^�����̂悤�Ɋ���U���Ă��܂��B���̂��߂Ɉ�ʂ̃����R���Ɗ����܂��B���[�_�[����ύX����ȂǓƎ��t�H�[�}�b�g�Ƃ��ׂ��ł��傤�������ړI�Ƃ��Ėڂ��Ԃ��Ă��܂��BUART �f�[�^���ڂł��ǂ����Ǝv���܂��B
-
-* ��:�A�h���X���8�r�b�g
-* ��:�A�h���X����8�r�b�g
-* �b:�R�}���h8�r�b�g
+* 時:アドレス上位8ビット
+* 分:アドレス下位8ビット
+* 秒:コマンド8ビット
 
 ## ESP8266 - master
 
-WiFi �ɐڑ��� NTP �T�[�o�Ɠ������Ď��������擾�AOLED �ɕ\�����Ė��b��������ԊO�����M���܂��B
+WiFi に接続し NTP サーバと同期して時刻情報を取得、OLED に表示して毎秒時刻情報を赤外線送信します。
 
-* �ԊO���ʐM���C�u���� https://github.com/Arduino-IRremote/Arduino-IRremote  
-�g�p�s���� PinDefinitainAndMore.h �� ESP8266 �Ɋւ��镔�����Q��
-* I2C �ڑ� OLED (SSD1306 128x64) Adafruit_SSD1306 ���C�u����  
+* 赤外線通信ライブラリ https://github.com/Arduino-IRremote/Arduino-IRremote  
+使用ピンは PinDefinitainAndMore.h の ESP8266 に関する部分を参照
+* I2C 接続 OLED (SSD1306 128x64) Adafruit_SSD1306 ライブラリ  
 
 ## AVR - slave
 
-ATmega328P ���O�t���������U��Ȃ��� 3.3V/8MHz ����Ƃ��� [Arduino](https://github.com/technoblogy/atmegabreadboard) �œ������Ă��܂��B�莝���̊֌W�� 328P ���g���܂����� 168(P) �ł������ł��傤�B
+ATmega328P を外付け水晶発振器なしの 3.3V/8MHz 動作とした [Arduino](https://github.com/technoblogy/atmegabreadboard) で動かしています。手持ちの関係で 328P を使いましたが 168(P) でも動くでしょう。
 
-IR �ʐM�ɂ� ESP8266 �Ɠ����� Arduino-IRremote ���C�u������p���Ă��܂��B7-seg LCD �� GPIO �ɂ�钼�ڋ쓮�ŏĕt���h�~�̂��� 50Hz �ŋɐ����]�������Ȃ��܂��B�s���z�u�ɂ��Ă̓\�[�X���̃R�����g���Q�Ƃ��Ă��������B���̃X���[�u���j�b�g�����l�ł��B
+IR 通信には ESP8266 と同じく Arduino-IRremote ライブラリを用いています。7-seg LCD は GPIO による直接駆動で焼付き防止のため 50Hz で極性反転をおこないます。ピン配置についてはソース中のコメントを参照してください。他のスレーブユニットも同様です。
 
 ## MSP430 - slave
 
-MSP430G2553 �� Energia �œ������Ă��܂��B�O�t���������U��͎g���܂���B
-Energia �� IRremote ���C�u������ Arduino �̂��̂Ƃ͈قȂ�܂��B
-
+MSP430G2553 を Energia で動かしています。外付け水晶発振器は使いません。
+Energia の IRremote ライブラリは Arduino のものとは異なります。
+MSP430
 ## CH32V - slave
 
-������ RISCV �}�C�R�� CH32V003F4P6 ���O�t���������U�햳�� xxMHz �œ������Ă��܂��B
-������� Arduino ���ł̃��C�u�������s�\���Ȃ��߁AMounRiver Studio ���Ńr���h���܂����B
+安価の RISCV マイコン CH32V003F4P6 を外付け水晶発振器無し xxMHz で動かしています。
+こちらは Arduino 環境でのライブラリが不十分なため、MounRiver Studio 環境でビルドしました。
 
-�ԊO����M�ɂ��Ă� https://github.com/openwch/ch32v003 ���� InputCapture �̃R�[�h���Q�l�ɏ����Ă��܂��B
+赤外線受信については https://github.com/openwch/ch32v003 から InputCapture のコードを参考に書いています。
 
 ![KETACLOCK](KETACLOCK.jfif)
 
+<img src="ATmega328P.jfif" width="320" /> AVR / ATMega328P
+
+<img src="MSP430.jfif" width="320" /> MSP430 / MSP430G2553
+
+<img src="CH32V003.jfif" width="320" /> CH32V / CH32V003F4P6
