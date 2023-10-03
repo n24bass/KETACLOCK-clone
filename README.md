@@ -1,7 +1,7 @@
 # KETACLOCK clone
 
 これは MIRO/MobileHackerz さんのプロジェクト[KETACLOCK - 桁ごとに独立した時計](http://mobilehackerz.jp/contents/Hardware/KETACLOCK)を模倣したものです。実際の回路やコードは公開されていないためオリジナルとは異なります。
-MSP430
+
 * 時刻情報を送信する一台のマスタと各桁の表示をおこなうスレーブユニットからなる。
 * できるだけ電池で動作させる。
 * マスタユニットには ESP8266 を用いて NTP 同期による正確な時刻を供給する。
@@ -35,7 +35,7 @@ IR 通信には ESP8266 と同じく Arduino-IRremote ライブラリを用い�
 
 MSP430G2553 を Energia で動かしています。外付け水晶発振器は使いません。
 Energia の IRremote ライブラリは Arduino のものとは異なります。
-MSP430
+
 ## CH32V - slave
 
 安価の RISCV マイコン CH32V003F4P6 を外付け水晶発振器無し xxMHz で動かしています。
