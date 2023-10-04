@@ -44,6 +44,7 @@ Energia の IRremote ライブラリは Arduino のものとは異なります�
 赤外線受信については https://github.com/openwch/ch32v003 から InputCapture のコードを参考に書いています。
 
 ![KETACLOCK](KETACLOCK.jfif)
+esp8266 モジュールの基板上での配置はよろしくありません。
 
 <img src="ATmega328P.jfif" width="320" /> AVR / ATMega328P
 
